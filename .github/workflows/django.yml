@@ -47,7 +47,6 @@ jobs:
       - name: Run migrations
         run: python manage.py migrate --noinput
 
-      - name: Collect static files
-        run: python manage.py collectstatic --noinput
+
 
  
