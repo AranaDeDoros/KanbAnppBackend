@@ -1,19 +1,10 @@
 from django.db import models
 from django.conf import settings
 from projects.models import Project
+from common.choices import STATUS_CHOICES
+from common.choices import PRIORITIES
 
 class Task(models.Model):
-    STATUS_CHOICES = [
-        ('backlog', 'Backlog'),
-        ('wip', 'In Progress'),
-        ('done', 'Completed'),
-    ]
-
-    PRIORITIES = [
-        ('high', 'High'),
-        ('regular', 'Regular'),
-        ('low', 'Low'),
-    ]
 
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
