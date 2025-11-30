@@ -9,7 +9,7 @@ def api_client():
     return APIClient()
 
 @pytest.fixture
-def d(db):
+def users(db):
     owner = User.objects.create_user(username="owner", password="pass")
     member = User.objects.create_user(username="member", password="pass")
     outsider = User.objects.create_user(username="outsider", password="pass")
@@ -18,18 +18,21 @@ def d(db):
 @pytest.fixture
 def projects(users):
     owner, member, _ = users
-    p1 = Project.objects.create(name="Owner Project", description="", owner=owner)
-    p2 = Project.objects.create(name="Member Project", description="", owner=User.objects.create_user(username="other", password="pass"))
+    p1 = Project.objects.create(
+        name="Owner Project", description="", owner=owner
+    )
+    p2_owner = User.objects.create_user(username="other", password="pass")
+    p2 = Project.objects.create(name="Member Project", description="", owner=p2_owner)
     p2.members.add(member)
-    p3 = Project.objects.create(name="Other Project", description="", owner=User.objects.create_user(username="someone", password="pass"))
+    p3_owner = User.objects.create_user(username="someone", password="pass")
+    p3 = Project.objects.create(name="Other Project", description="", owner=p3_owner)
     return p1, p2, p3
 
 @pytest.fixture
 def auth_client(api_client, users):
-    owner, member, outsider = users
     def get_client(user):
         refresh = RefreshToken.for_user(user)
-        api_client.credentials(HTTP_AUTHORIZATION=f'Bearer {refresh.access_token}')
+        api_client.credentials(HTTP_AUTHORIZATION=f"Bearer {refresh.access_token}")
         return api_client
     return get_client
 
