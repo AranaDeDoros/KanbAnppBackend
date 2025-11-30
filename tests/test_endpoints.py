@@ -43,7 +43,7 @@ def auth_client(api_client, users):
 @pytest.mark.django_db
 def test_owner_sees_own_projects(auth_client, projects, users):
     client = auth_client(users[0])  # owner
-    response = client.get("/projects/")
+    response = client.get("/api/projects/")
     ids = [p["id"] for p in response.json()]
     assert projects[0].id in ids
     assert projects[1].id not in ids
@@ -52,7 +52,7 @@ def test_owner_sees_own_projects(auth_client, projects, users):
 @pytest.mark.django_db
 def test_member_sees_member_projects(auth_client, projects, users):
     client = auth_client(users[1])  # member
-    response = client.get("/projects/")
+    response = client.get("/api/projects/")
     ids = [p["id"] for p in response.json()]
     assert projects[1].id in ids
     assert projects[0].id not in ids
@@ -61,6 +61,6 @@ def test_member_sees_member_projects(auth_client, projects, users):
 @pytest.mark.django_db
 def test_outsider_sees_nothing(auth_client, projects, users):
     client = auth_client(users[2])  # outsider
-    response = client.get("/projects/")
+    response = client.get("/api/projects/")
     ids = [p["id"] for p in response.json()]
     assert ids == []
