@@ -7,8 +7,8 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         #empty tasks
-        deletedTask = Task.objects.filter().delete()
+        Task.objects.filter().delete()
         #delete all but one first project
-        deletedProjects = Project.objects.filter(id__gt=1).delete()
+        Project.objects.filter(id__gt=0).delete()
         self.stdout.write(self.style.SUCCESS(f"Deleted records"))
 
