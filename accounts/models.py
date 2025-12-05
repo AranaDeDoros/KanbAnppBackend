@@ -3,6 +3,8 @@ from django.db import models
 from django.contrib.auth.models import User
 
 class Role(models.Model):
+    ADMIN = "admin"
+    COLLABORATOR = "collaborator"
     name = models.CharField(max_length=100)
     members = models.ManyToManyField(User, related_name='roles')
 
@@ -17,4 +19,4 @@ class IsAdminRole(BasePermission):
     """
     def has_permission(self, request, view):
         user = request.user
-        return user.is_authenticated and user.roles.filter(name="Admin").exists()
+        return user.is_authenticated and user.roles.filter(name=Role.ADMIN).exists()
