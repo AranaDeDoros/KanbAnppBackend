@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import Task
+from .models import Task, TaskAttachments
 from bleach import clean
 
 User = get_user_model()
@@ -29,3 +29,8 @@ class TaskSerializer(serializers.ModelSerializer):
 
     def validate_description(self, value):
         return clean(value, tags=allowed_tags)
+
+class TaskAttachmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskAttachments
+        fields = ["id", "file", "uploaded_at"]

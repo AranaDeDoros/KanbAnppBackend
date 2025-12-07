@@ -24,22 +24,43 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-from .models import Task
-from .serializers import TaskSerializer
 
-@receiver(post_save, sender=Task)
-def notify_task_update(sender, instance, created, **kwargs):
-    channel_layer = get_channel_layer()
-    data = TaskSerializer(instance).data
+import os
+import uuid
+from datetime import datetime
 
-    async_to_sync(channel_layer.group_send)(
-        "tasks_updates",
-        {
-            "type": "task_update",
-            "data": data,
-        },
+def task_attachment_upload_path(instance, filename):
+    ext = filename.split('.')[-1].lower()
+    new_filename = f"{uuid.uuid4()}.{ext}"
+
+    today = datetime.now()
+    year = today.strftime("%Y")
+    month = today.strftime("%m")
+    day = today.strftime("%d")
+
+    return os.path.join(
+        "tasks",
+        str(instance.task.id),
+        year,
+        month,
+        day,
+        new_filename
     )
+
+
+class TaskAttachments(models.Model):
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='attachments')
+    file = models.FileField(upload_to=task_attachment_upload_path)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Attachment for {self.task.title} uploaded at {self.uploaded_at}"
+
+    def delete(self, *args, **kwargs):
+        storage = self.file.storage
+        path = self.file.path
+
+        super().delete(*args, **kwargs)
+
+        if storage.exists(path):
+            storage.delete(path)

@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     # Local apps
     'accounts',
     'projects',
-    'tasks',
+    'tasks.apps.TasksConfig',
 ]
 
 MIDDLEWARE = [
@@ -92,3 +92,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+MEDIA_ROOT = 'task_attachments/media/'
+MEDIA_URL = '/media/'
