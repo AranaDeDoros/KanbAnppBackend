@@ -52,7 +52,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         return response
 
     def __validate_attachments__(self, attachments) -> bool:
-        if len(attachments) > 5 or len(attachments):
+        if len(attachments) > 5:
            return False
         return True
 
