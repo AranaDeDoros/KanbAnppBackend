@@ -1,7 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import Task, TaskAttachments
+from .models import Task, TaskAttachments, Tag
 from .serializers import TaskSerializer, TaskAttachmentSerializer
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -16,7 +16,8 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 
     def create(self, request, *args, **kwargs):
-        attachments = request.FILES.getlist("file_attachments")
+        attachments = request.FILES.getlist("attachments")
+
 
         if not self.__validate_attachments__(attachments):
             return Response(
@@ -31,10 +32,14 @@ class TaskViewSet(viewsets.ModelViewSet):
         for file in attachments:
             TaskAttachments.objects.create(task=task, file=file)
 
+        for tag_id in request.data.get("tags", []):
+            tag = get_object_or_404(Tag, id=tag_id)
+            task.tags.add(tag)
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):
-        attachments = request.FILES.getlist("file_attachments")
+        attachments = request.FILES.getlist("attachments")
 
         if not self.__validate_attachments__(attachments):
             return Response(
@@ -48,6 +53,10 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         for file in attachments:
             TaskAttachments.objects.create(task=task, file=file)
+
+        for tag_id in request.data.get("tags", []):
+            tag = get_object_or_404(Tag, id=tag_id)
+            task.tags.add(tag)
 
         return response
 
@@ -69,7 +78,7 @@ class TaskAttachmentViewSet(viewsets.ViewSet):
     def create(self, request, task_pk=None):
         task = get_object_or_404(Task, pk=task_pk)
 
-        files = request.FILES.getlist("file_attachments")
+        files = request.FILES.getlist("attachments")
 
         created_items = []
         for f in files:

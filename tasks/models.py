@@ -64,3 +64,10 @@ class TaskAttachments(models.Model):
 
         if storage.exists(path):
             storage.delete(path)
+
+class Tag(models.Model):
+    name = models.CharField(max_length=50)
+    tasks = models.ManyToManyField(Task, related_name='tags')
+
+    def __str__(self):
+        return self.name
