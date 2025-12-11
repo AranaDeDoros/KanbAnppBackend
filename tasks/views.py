@@ -2,7 +2,9 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from .models import Task, TaskAttachments, Tag
-from .serializers import TaskSerializer, TaskAttachmentSerializer
+from .serializers import TaskSerializer, TaskAttachmentSerializer, TagSerializer
+from rest_framework.decorators import action
+from rest_framework import status
 
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
@@ -66,7 +68,6 @@ class TaskViewSet(viewsets.ModelViewSet):
         return True
 
 
-#wip
 class TaskAttachmentViewSet(viewsets.ViewSet):
 
     def list(self, request, task_pk=None):
@@ -93,3 +94,67 @@ class TaskAttachmentViewSet(viewsets.ViewSet):
         attachment = get_object_or_404(TaskAttachments, pk=pk, task=task)
         attachment.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class TagViewSet(viewsets.ModelViewSet):
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+
+    def get_queryset(self):
+        queryset = Tag.objects.all()
+        names = self.request.query_params.getlist("name", [])
+
+        # name=a,b,c
+        if len(names) == 1 and "," in names[0]:
+            names = names[0].split(",")
+
+        if names:
+            queryset = queryset.filter(name__in=[n.lower() for n in names])
+
+        search = self.request.query_params.get("search")
+        if search:
+            queryset = queryset.filter(name__icontains=search.lower())
+
+        return queryset
+
+    @action(detail=False, methods=["post","put"], url_path="bulk")
+    def bulk_create(self, request):
+        tags = request.data.get("tags", [])
+
+        if not isinstance(tags, list):
+            return Response({"error": "tags must be a list"}, status=400)
+
+        normalized = [t.strip().lower() for t in tags if t.strip()]
+        normalized = list(set(normalized))  # dupes removal
+
+        created = []
+        existing = []
+
+        for name in normalized:
+            tag, was_created = Tag.objects.get_or_create(name=name)
+            if was_created:
+                created.append(tag)
+            else:
+                existing.append(tag)
+
+        serializer = TagSerializer(created + existing, many=True)
+        return Response(
+            {
+                "created": TagSerializer(created, many=True).data,
+                "existing": TagSerializer(existing, many=True).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    @action(detail=False, methods=["get"], url_path="autocomplete")
+    def autocomplete(self, request):
+        query = request.query_params.get("query")
+
+        if not query:
+            return Response([], status=200)
+
+        results = Tag.objects.filter(name__icontains=query.lower())[:10]
+
+        serializer = TagSerializer(results, many=True)
+        return Response(serializer.data)

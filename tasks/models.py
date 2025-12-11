@@ -66,8 +66,13 @@ class TaskAttachments(models.Model):
             storage.delete(path)
 
 class Tag(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     tasks = models.ManyToManyField(Task, related_name='tags')
+
+    def save(self, *args, **kwargs):
+        if self.name:
+            self.name = self.name.lower()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
