@@ -120,7 +120,7 @@ class TagViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post","put"], url_path="bulk")
     def bulk_create(self, request):
-        tags = request.data.get("tags", [])
+        tags = request.data.get("newTags", [])
 
         if not isinstance(tags, list):
             return Response({"error": "tags must be a list"}, status=400)
@@ -129,20 +129,17 @@ class TagViewSet(viewsets.ModelViewSet):
         normalized = list(set(normalized))  # dupes removal
 
         created = []
-        existing = []
 
         for name in normalized:
             tag, was_created = Tag.objects.get_or_create(name=name)
             if was_created:
                 created.append(tag)
-            else:
-                existing.append(tag)
 
-        serializer = TagSerializer(created + existing, many=True)
+
+        serializer = TagSerializer(created , many=True)
         return Response(
             {
                 "created": TagSerializer(created, many=True).data,
-                "existing": TagSerializer(existing, many=True).data,
             },
             status=status.HTTP_201_CREATED,
         )

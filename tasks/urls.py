@@ -5,12 +5,15 @@ from tasks.views import TaskViewSet, TaskAttachmentViewSet, TagViewSet
 
 router = DefaultRouter()
 router.register(r"", TaskViewSet, basename="task")
-router.register(r"", TagViewSet, basename="tag")
 attachments_router = routers.NestedSimpleRouter(router, r"", lookup="task")
 attachments_router.register(r"attachments", TaskAttachmentViewSet, basename="task-attachments")
 
+tag_router = DefaultRouter()
+tag_router.register(r"", TagViewSet, basename="tag")
+
 urlpatterns = [
-    path("", include(router.urls)),
-    path("", include(attachments_router.urls)),
+    path("tasks/", include(router.urls)),
+    path("tasks/", include(attachments_router.urls)),
+    path("tags/", include(tag_router.urls)),
 ]
 
