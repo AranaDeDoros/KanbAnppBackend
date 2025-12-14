@@ -26,14 +26,11 @@ class Task(models.Model):
 
 
 import os
-import uuid
 import hashlib
 from datetime import datetime
 
 def task_attachment_upload_path(instance, filename):
 
-    #ext = filename.split('.')[-1].lower()
-    #new_filename = f"{uuid.uuid4()}.{ext}"
 
     today = datetime.now()
     year = today.strftime("%Y")
@@ -46,7 +43,7 @@ def task_attachment_upload_path(instance, filename):
     for chunk in file.chunks():
         hasher.update(chunk)
 
-    file_hash = hasher.hexdigest()[:16]  # corto pero seguro
+    file_hash = hasher.hexdigest()[:16]
     new_filename = f"{filename}_{file_hash}"
 
     return os.path.join(

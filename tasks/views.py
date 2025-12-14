@@ -69,7 +69,11 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 from common.file_validation import validate_uploaded_file
 from rest_framework.exceptions import ValidationError
+from rest_framework.throttling import ScopedRateThrottle
+
 class TaskAttachmentViewSet(viewsets.ViewSet):
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "attachment_upload"
 
     def list(self, request, task_pk=None):
         task = get_object_or_404(Task, pk=task_pk)
