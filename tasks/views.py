@@ -67,7 +67,8 @@ class TaskViewSet(viewsets.ModelViewSet):
            return False
         return True
 
-
+from common.file_validation import validate_uploaded_file
+from rest_framework.exceptions import ValidationError
 class TaskAttachmentViewSet(viewsets.ViewSet):
 
     def list(self, request, task_pk=None):
@@ -81,8 +82,16 @@ class TaskAttachmentViewSet(viewsets.ViewSet):
 
         files = request.FILES.getlist("attachments")
 
+        if not files:
+            raise ValidationError("No se enviaron archivos")
+
         created_items = []
         for f in files:
+            try:
+                validate_uploaded_file(f)
+            except ValueError as e:
+                raise ValidationError(str(e))
+
             attach = TaskAttachments.objects.create(task=task, file=f)
             created_items.append(attach)
 

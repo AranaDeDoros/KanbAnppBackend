@@ -27,16 +27,27 @@ class Task(models.Model):
 
 import os
 import uuid
+import hashlib
 from datetime import datetime
 
 def task_attachment_upload_path(instance, filename):
-    ext = filename.split('.')[-1].lower()
-    new_filename = f"{uuid.uuid4()}.{ext}"
+
+    #ext = filename.split('.')[-1].lower()
+    #new_filename = f"{uuid.uuid4()}.{ext}"
 
     today = datetime.now()
     year = today.strftime("%Y")
     month = today.strftime("%m")
     day = today.strftime("%d")
+
+    file = instance.file
+    file.seek(0)
+    hasher = hashlib.sha256()
+    for chunk in file.chunks():
+        hasher.update(chunk)
+
+    file_hash = hasher.hexdigest()[:16]  # corto pero seguro
+    new_filename = f"{filename}_{file_hash}"
 
     return os.path.join(
         "tasks",
@@ -52,6 +63,10 @@ class TaskAttachments(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='attachments')
     file = models.FileField(upload_to=task_attachment_upload_path)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+    def getFileName(self):
+        return os.path.basename(self.file.name)
 
     def __str__(self):
         return f"Attachment for {self.task.title} uploaded at {self.uploaded_at}"

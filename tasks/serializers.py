@@ -10,9 +10,14 @@ allowed_tags = ["p", "br", "strong", "h1", "h2", "em", "b", "i", "u", "ul", "ol"
 
 
 class TaskAttachmentSerializer(serializers.ModelSerializer):
+    filename = serializers.SerializerMethodField()
+
     class Meta:
         model = TaskAttachments
-        fields = ["id", "file", "uploaded_at"]
+        fields = ["id", "file","filename", "uploaded_at"]
+
+    def get_filename(self, obj):
+        return obj.getFileName()
 
 
 class TagSerializer(serializers.ModelSerializer):
