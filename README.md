@@ -13,3 +13,5 @@ A small test side project. WIP.
 - SQLite (for now)
 
 Frontend [here](https://github.com/AranaDeDoros/kanban-prototype)
+## TODO
+- [ ] Add tags filtering on kanban.
