@@ -5,7 +5,7 @@ from .models import Task, TaskAttachments, Tag
 from .serializers import TaskSerializer, TaskAttachmentSerializer, TagSerializer
 from rest_framework.decorators import action
 from rest_framework import status
-from .realtime import broadcast_task
+from .updates import broadcast_task
 
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
