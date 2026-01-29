@@ -5,6 +5,7 @@ from .models import Task, TaskAttachments, Tag
 from .serializers import TaskSerializer, TaskAttachmentSerializer, TagSerializer
 from rest_framework.decorators import action
 from rest_framework import status
+from .realtime import broadcast_task
 
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
@@ -27,16 +28,26 @@ class TaskViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(
+            data=request.data,
+            context={"request": request},
+        )
         serializer.is_valid(raise_exception=True)
         task = serializer.save()
 
-        for file in attachments:
-            TaskAttachments.objects.create(task=task, file=file)
+        """ for file in attachments:
+            TaskAttachments.objects.create(task=task, file=file) """
 
         for tag_id in request.data.get("tags", []):
             tag = get_object_or_404(Tag, id=tag_id)
             task.tags.add(tag)
+
+        data = TaskSerializer(
+            task,
+            context={"request": request},
+        ).data
+
+        broadcast_task(data)
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -53,14 +64,21 @@ class TaskViewSet(viewsets.ModelViewSet):
 
         task = self.get_object()
 
-        for file in attachments:
-            TaskAttachments.objects.create(task=task, file=file)
+        """ for file in attachments:
+            TaskAttachments.objects.create(task=task, file=file) """
 
         for tag_id in request.data.get("tags", []):
             tag = get_object_or_404(Tag, id=tag_id)
             task.tags.add(tag)
 
-        return response
+        data = TaskSerializer(
+            task,
+            context={"request": request},
+        ).data
+
+        broadcast_task(data)
+
+        return Response(data)
 
     def __validate_attachments__(self, attachments) -> bool:
         if len(attachments) > 5:

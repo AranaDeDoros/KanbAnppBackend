@@ -39,7 +39,7 @@ class TaskSerializer(serializers.ModelSerializer):
     )
 
     assigned_to_user = UserSerializer(source="assigned_to", read_only=True)
-    tags = TagSerializer(many=True, required=False)
+    tags = TagSerializer(many=True, required=False, read_only=True)
     attachments = TaskAttachmentSerializer(many=True, read_only=True)
 
     class Meta:
