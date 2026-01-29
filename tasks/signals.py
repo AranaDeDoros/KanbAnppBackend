@@ -5,7 +5,7 @@ from channels.layers import get_channel_layer
 from .models import Task
 from .serializers import TaskSerializer
 """used in websocket to notify clients about task updates"""
-@receiver(post_save, sender=Task)
+#@receiver(post_save, sender=Task)
 def notify_task_update(sender, instance, created, **kwargs):
     channel_layer = get_channel_layer()
     data = TaskSerializer(instance).data
