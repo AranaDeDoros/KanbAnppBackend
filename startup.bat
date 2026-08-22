@@ -1,1 +1,1 @@
-venv\Scripts\activate.bat && daphne backend.asgi:application
+venv\Scripts\python.exe -m daphne backend.asgi:application
