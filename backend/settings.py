@@ -1,6 +1,6 @@
 from pathlib import Path
 from datetime import timedelta
-from decouple import config
+from decouple import Csv, config
 import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -89,7 +89,11 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
-CORS_ALLOWED_ORIGINS = [config('DJANGO_ALLOWED_HOSTS', default=['http://localhost:3000',])]
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:3000',
+    cast=Csv(),
+)
 
 
 LANGUAGE_CODE = 'en-us'
