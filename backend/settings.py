@@ -89,7 +89,7 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': True,
 }
 
-CORS_ALLOWED_ORIGINS = [config('DJANGO_ALLOWED_HOSTS')]
+CORS_ALLOWED_ORIGINS = [config('DJANGO_ALLOWED_HOSTS', default='http://localhost:3000').split(',')]
 
 
 LANGUAGE_CODE = 'en-us'
