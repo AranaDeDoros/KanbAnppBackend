@@ -37,18 +37,18 @@ def register(request):
 
     try:
         user = User.objects.create_user(username=username, password=password, email=email)
-        
-        # Assign collaborator role by default
-        collaborator_role, _ = Role.objects.get_or_create(name=Role.COLLABORATOR)
+
+        # Assign admin role by default, dev only, for mvp
+        collaborator_role, _ = Role.objects.get_or_create(name=Role.ADMIN)
         user.roles.add(collaborator_role)
 
         # Generate tokens
         refresh = RefreshToken.for_user(user)
-        
+
         response_data = UserSerializer(user).data
         response_data['access'] = str(refresh.access_token)
         response_data['refresh'] = str(refresh)
-        
+
         return Response(response_data, status=status.HTTP_201_CREATED)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
