@@ -1,0 +1,38 @@
+databases:
+  - name: testing
+    plan: free
+
+
+services:
+  - type: web
+    name: kanbanpp-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile.backend
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8000
+      - key: DATABASE_URL
+        fromDatabase:
+          name:  testing
+          property: connectionString
+      - key: REDIS_URL
+        sync: false
+      - key: DJANGO_SECRET_KEY
+        sync: false
+      - key: DJANGO_ALLOWED_HOSTS
+        sync: false
+
+  - type: web
+    name: kanbanpp-frontend
+    runtime: docker
+    repo: https://github.com/AranaDeDoros/KanbAnpp
+    dockerfilePath: ./Dockerfile.frontend
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: PORT
+        value: 80
+      - key: VITE_API_URL
+        sync: false
