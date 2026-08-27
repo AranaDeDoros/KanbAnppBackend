@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 class Role(models.Model):
     ADMIN = "admin"
     COLLABORATOR = "collaborator"
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     members = models.ManyToManyField(User, related_name='roles')
 
     def __str__(self):
